@@ -1,0 +1,59 @@
+// Prisma 셋업 (Typescript + MySQL)
+
+// 1. npm install prisma -D
+
+// 2. npx prisma init
+// 이 명령은 schema.prisma라는 파일과 프로젝트 루트에 .env 파일을 포함하는 prisma라는 새 디렉토리를 생성했습니다. schema.prisma는 데이터베이스 연결과 Prisma Client 생성기가 있는 Prisma 스키마를 포함합니다. .env는 환경 변수를 정의하기 위한 dotenv 파일입니다. (데이터베이스 연결에 사용됨)
+// https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases-typescript-mysql
+
+// Prisma Model 예시
+// https://www.prisma.io/docs/concepts/components/prisma-schema
+
+// VSCode Prisma Extension
+// https://marketplace.visualstudio.com/items?itemName=Prisma.prisma
+
+// Planet Scale cli 설치 (윈도우)
+// 1. Scoop 설치 (Windows용 커맨드 라인 설치 프로그램)
+// https://scoop.sh/
+// 2. scoop bucket add pscale https://github.com/planetscale/scoop-bucket.git
+// 3. scoop install pscale mysql
+// 4. scoop update pscale
+
+// PlanetScale CLI를 사용하여 데이터베이스를 생성
+// 먼저 pscale auth login 으로 로그인
+// pscale database create yourDB --region ap-northeast
+
+// 보안 터널을 통해 PlanetScale과 컴퓨터를 연결할 수 있다
+
+// `pscale connect yourDB`
+
+// pscale 에서 제공하는 URL을 데이터베이스에 연결
+
+// .env 파일 내 `DATABASE_URL="mysql://127.0.0.1:3306/yourDB"`
+
+// schema를 Planet Scale 에 push -> npx prisma db push
+
+// prisma 관리자 패널 ->  npx prisma studio
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  // vitess에서는 foreign key가 없어도 오류를 내지 않기때문에 prisma에서 제약이 있도록 만든다.
+  relationMode = "prisma"
+}
+
+model User {
+  // @id -> model의 id 유니크 식별자
+  // 필수적이지 않은 선택적인 옵션은 ?를 붙혀준다. (require X)
+  id Int @id @default(autoincrement())
+  phone Int? @unique
+  email String? @unique
+  name String //require
+  avatar String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
