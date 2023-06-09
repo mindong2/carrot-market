@@ -1,19 +1,40 @@
 import type { NextPage } from "next";
 import { useState } from "react";
-import Button from "../components/button";
-import Input from "../components/input";
-import { cls } from "../libs/utils";
+import Button from "@/components/button";
+import Input from "@/components/input";
+import { cls } from "@/libs/client/utils";
+import { useForm } from "react-hook-form";
+import useMutation from "@/libs/client/useMutation";
+
+interface EnterForm {
+  email : string;
+  phone : string;
+}
 
 const Enter: NextPage = () => {
+  // arr의 첫번째요소는 api로 보낼 함수 이것으로 백엔드에 fetch
+  const [enter, {loading, data, error}] = useMutation('/api/user/enter');
+  const { register, handleSubmit, reset } = useForm<EnterForm>()
   const [method, setMethod] = useState<"email" | "phone">("email");
-  const onEmailClick = () => setMethod("email");
-  const onPhoneClick = () => setMethod("phone");
+  const [submitting, setSubmitting] = useState(false);
+  // tab해도 다른 tab의 value가 남아있으므로 reset으로 초기화
+  const onEmailClick = () => { 
+    setMethod("email");
+    reset();
+  };
+  const onPhoneClick = () => { 
+    setMethod("phone");
+    reset();
+  };
+  const onValid = (data : EnterForm) => {
+    enter(data);
+  }
   return (
     <div className="mt-16 px-4">
-      <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
+      <h3 className="text-3xl font-bold text-center">마켓 로그인</h3>
       <div className="mt-12">
         <div className="flex flex-col items-center">
-          <h5 className="text-sm text-gray-500 font-medium">Enter using:</h5>
+          <h5 className="text-sm text-gray-500 font-medium">로그인 방식</h5>
           <div className="grid  border-b  w-full mt-8 grid-cols-2 ">
             <button
               className={cls(
@@ -24,7 +45,7 @@ const Enter: NextPage = () => {
               )}
               onClick={onEmailClick}
             >
-              Email
+              이메일
             </button>
             <button
               className={cls(
@@ -35,26 +56,27 @@ const Enter: NextPage = () => {
               )}
               onClick={onPhoneClick}
             >
-              Phone
+              휴대폰
             </button>
           </div>
         </div>
-        <form className="flex flex-col mt-8 space-y-4">
+        <form  onSubmit={handleSubmit(onValid)} className="flex flex-col mt-8 space-y-4">
           {method === "email" ? (
-            <Input name="email" label="Email address" type="email" required />
+            <Input name="email" register={register('email')} label="이메일 주소" type="email" required />
           ) : null}
           {method === "phone" ? (
             <Input
               name="phone"
+              register = {register('phone')}
               label="Phone number"
-              type="number"
+              type="text"
               kind="phone"
               required
             />
           ) : null}
-          {method === "email" ? <Button text={"Get login link"} /> : null}
+          {method === "email" ? <Button text={submitting ? '로그인중입니다...' : '로그인 링크로 이동'} /> : null}
           {method === "phone" ? (
-            <Button text={"Get one-time password"} />
+            <Button text={"인증번호 발급"} />
           ) : null}
         </form>
 
@@ -63,12 +85,12 @@ const Enter: NextPage = () => {
             <div className="absolute w-full border-t border-gray-300" />
             <div className="relative -top-3 text-center ">
               <span className="bg-white px-2 text-sm text-gray-500">
-                Or enter with
+                기타 로그인
               </span>
             </div>
           </div>
           <div className="grid grid-cols-2 mt-2 gap-3">
-            <button className="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <button className="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-all">
               <svg
                 className="w-5 h-5"
                 aria-hidden="true"
@@ -78,7 +100,7 @@ const Enter: NextPage = () => {
                 <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
               </svg>
             </button>
-            <button className="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <button className="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-all">
               <svg
                 className="w-5 h-5"
                 aria-hidden="true"
