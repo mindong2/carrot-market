@@ -50,10 +50,25 @@ model User {
   // @id -> model의 id 유니크 식별자
   // 필수적이지 않은 선택적인 옵션은 ?를 붙혀준다. (require X)
   id Int @id @default(autoincrement())
-  phone Int? @unique
+  phone String? @unique
   email String? @unique
   name String //require
   avatar String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tokens Token[]
+}
+
+model Token {
+  // @id -> model의 id 유니크 식별자
+  // 필수적이지 않은 선택적인 옵션은 ?를 붙혀준다. (require X)
+  id Int @id @default(autoincrement())
+  payload String @unique
+  // Token 모델의 userId가 User모델의 id를 바라보고있다 따라서 userId가 User 모델의 id
+  // onDlete: Cascade -> user가 삭제되었을때 Token(자식)도 함께삭제
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId Int
+  @@index([userId])
 }

@@ -1,32 +1,31 @@
-import { useState } from "react"
+import { useState } from "react";
 
-interface IMutation { 
-    loading : boolean,
-    data ?: undefined | any,
-    error ?: undefined | any
+interface UseMutationState<T> {
+  loading: boolean;
+  data?: T;
+  error?: object;
 }
+type UseMutationResult<T> = [(data: any) => void, UseMutationState<T>];
 
-type UseMutationResult = [(data:any)=> void, IMutation]
-
-export default function useMutation(url : string) : UseMutationResult {
-    const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<undefined | any>(undefined);
-    const [error, setError] = useState<undefined | any>(undefined);
-     
-    const mutation = (data : any) => {
-        setLoading(true);
-        fetch(url, {
-          method: 'POST',
-          body : JSON.stringify(data),
-          // 백엔드의 req.body에는 email이 있지만 req.body.email을 찍어보면 undefined-> 이를 해결하기위해 client에서 headers 설정 필수
-          headers: {
-            'Content-Type' : "application/json"
-          }
-        }).then((response) => response.json().catch(()=>{}))
-        .then((json) => setData(json))
-        .catch((err) => setError(err))
-        .finally(() => setLoading(false))
-        
-    }
-    return [mutation, { loading, data, error }]
+export default function useMutation<T = any>(url: string): UseMutationResult<T> {
+  const [state, setSate] = useState<UseMutationState<T>>({
+    loading: false,
+    data: undefined,
+    error: undefined,
+  });
+  function mutation(data: any) {
+    setSate((prev) => ({ ...prev, loading: true }));
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json().catch(() => {}))
+      .then((data) => setSate((prev) => ({ ...prev, data })))
+      .catch((error) => setSate((prev) => ({ ...prev, error })))
+      .finally(() => setSate((prev) => ({ ...prev, loading: false })));
+  }
+  return [mutation, { ...state }];
 }

@@ -5,16 +5,21 @@ import { NextApiRequest, NextApiResponse } from "next";
 type HandlerMethodType = "GET" | "POST" | "DELETE";
 type HandlerFnType = (req: NextApiRequest, res: NextApiResponse) => void;
 
+export interface ResponseType {
+  success: boolean;
+  [key: string]: any;
+}
+
 export default function withHandler(method: HandlerMethodType, fn: HandlerFnType) {
-    return async function(req: NextApiRequest, res: NextApiResponse) {
-        if(req.method !== method) {
-            res.status(405).end();
-        }
-        try{
-            await fn(req, res);
-        }catch(err){
-            console.log(err)
-            res.status(500).json({err});
-        }
+  return async function (req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== method) {
+      res.status(405).end();
     }
+    try {
+      await fn(req, res);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ err });
+    }
+  };
 }
