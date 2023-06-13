@@ -17,24 +17,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   if (!user) return res.status(400).json({ success: false });
 
   const payload = Math.floor(100000 + Math.random() * 900000) + "";
-  // const token = await client.token.create({
-  //   data: {
-  //     payload,
-  //     // payload 생성, user가 없다면 create, 있다면 connect
-  //     user: {
-  //       connectOrCreate: {
-  //         create: {
-  //           name: "Anonymous",
-  //           ...user,
-  //         },
-  //         where: {
-  //           ...user,
-  //         },
-  //       },
-  //     },
-  //   },
-  // });
-
+  const token = await client.token.create({
+    data: {
+      payload,
+      // payload 생성, user가 없다면 create, 있다면 connect
+      user: {
+        connectOrCreate: {
+          create: {
+            name: "Anonymous",
+            ...user,
+          },
+          where: {
+            ...user,
+          },
+        },
+      },
+    },
+  });
+  console.log(token)
   // 휴대폰 인증시
   if (phone) {
     // const message = await twilioClient.messages.create({
@@ -66,10 +66,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
     //   }
     // });
     // smtpTransport.close();
-    const result = "done";
-    console.log(result);
+    console.log('done');
   }
   return res.status(200).json({ success: true });
 }
 
-export default withHandler("POST", handler);
+
+export default withHandler(
+  {
+    method: "POST", 
+    handler,
+    isPrivate:false
+  }
+);

@@ -2,21 +2,27 @@
 
 import { NextApiRequest, NextApiResponse } from "next";
 
-type HandlerMethodType = "GET" | "POST" | "DELETE";
-type HandlerFnType = (req: NextApiRequest, res: NextApiResponse) => void;
-
 export interface ResponseType {
   success: boolean;
   [key: string]: any;
 }
 
-export default function withHandler(method: HandlerMethodType, fn: HandlerFnType) {
+interface configType {
+  method: "GET" | "POST" | "DELETE";
+  handler: (req: NextApiRequest, res: NextApiResponse) => void,
+  isPrivate ?: boolean
+}
+
+export default function withHandler({method, handler, isPrivate = true} : configType) {
   return async function (req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== method) {
       res.status(405).end();
     }
+    // if(isPrivate && !req.session.user) {
+    //   res.status(401).json({success:false, message: '로그인을 해주세요'})
+    // }
     try {
-      await fn(req, res);
+      await handler(req, res);
     } catch (err) {
       console.log(err);
       res.status(500).json({ err });

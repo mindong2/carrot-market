@@ -27,4 +27,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   res.json({ success: true });
 }
 
-export default withApiSession(withHandler("POST", handler));
+// private page
+export default withApiSession(
+  withHandler(
+    {
+      method:"POST",
+      handler,
+      isPrivate:false
+    }
+  )
+  );

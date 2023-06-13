@@ -10,4 +10,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   return res.json({ success: true, profile });
 }
 
-export default withApiSession(withHandler("GET", handler));
+export default withApiSession(
+  withHandler({
+      method:"GET",
+      handler,
+    }
+  )
+);
