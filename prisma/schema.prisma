@@ -57,6 +57,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   tokens Token[]
+  products Product[]
 }
 
 model Token {
@@ -67,6 +68,20 @@ model Token {
   // Token 모델의 userId가 User모델의 id를 바라보고있다 따라서 userId가 User 모델의 id
   // onDlete: Cascade -> user가 삭제되었을때 Token(자식)도 함께삭제
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId Int
+  @@index([userId])
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name String
+  image String
+  price Int
+  // @db로 정확한 field setting가능
+  description String @db.MediumText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId Int

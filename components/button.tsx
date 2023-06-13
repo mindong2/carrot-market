@@ -3,6 +3,7 @@ import { cls } from "@/libs/client/utils";
 interface ButtonProps {
   large?: boolean;
   text: string;
+  btnType ?: "button" | "submit" | "reset" | undefined;
   [key: string]: any;
 }
 
@@ -10,10 +11,12 @@ export default function Button({
   large = false,
   onClick,
   text,
+  btnType,
   ...rest
 }: ButtonProps) {
   return (
     <button
+      type={btnType}
       {...rest}
       className={cls(
         "  transition-all w-full bg-orange-500 hover:bg-orange-600 text-white  px-4 border border-transparent rounded-md shadow-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none",

@@ -18,9 +18,9 @@ export default function withHandler({method, handler, isPrivate = true} : config
     if (req.method !== method) {
       res.status(405).end();
     }
-    // if(isPrivate && !req.session.user) {
-    //   res.status(401).json({success:false, message: '로그인을 해주세요'})
-    // }
+    if(isPrivate && !req.session.user) {
+      return res.status(401).json({success:false, message: '로그인을 해주세요'})
+    }
     try {
       await handler(req, res);
     } catch (err) {
