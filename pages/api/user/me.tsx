@@ -7,7 +7,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   const profile = await client.user.findUnique({
     where: { id: req.session.user?.id },
   });
-  return res.json({ success: true, profile });
+  if(req.session.user) {
+    return res.json({ success: true, profile });
+  }else{
+    return res.json({success: false})
+  }
 }
 
 export default withApiSession(

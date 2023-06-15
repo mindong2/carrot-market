@@ -6,10 +6,20 @@ import useUser from "@/libs/client/useUser";
 import useSWR from "swr";
 import { Product } from "@prisma/client";
 
+interface ProductWithFavCounte extends Product{
+  _count : {
+    [key : string] : number;
+  };
+}
+
+interface ProductGetData{
+  success : boolean;
+  product : ProductWithFavCounte[];
+}
+
 const Home: NextPage = () => {
   const {user, isLoading} = useUser();
-  const { data } = useSWR('/api/products');
-  console.log(data);
+  const { data } = useSWR<ProductGetData>('/api/products');
   return (
     <Layout title="홈" hasTabBar>
       <div className="flex flex-col space-y-5 divide-y">
@@ -19,8 +29,8 @@ const Home: NextPage = () => {
             key={item.id}
             title={item.name}
             price={item.price}
-            comments={1}
-            hearts={1}
+            comments={0}
+            hearts={item._count.favorites}
           />
         ))}
         <FloatingButton href="/products/upload">

@@ -5,6 +5,9 @@ import useSWR from "swr";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Product, User } from "@prisma/client";
+import useMutation from "@/libs/client/useMutation";
+import { cls } from "@/libs/client/utils";
+import useUser from "@/libs/client/useUser";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -14,14 +17,40 @@ interface ItemTypes {
   success : boolean;
   product : ProductWithUser;
   similarItems?: Product[];
+  isFavorite : boolean;
 }
 
 const ItemDetail: NextPage = () => {
+  const {user, isLoading} = useUser();
   const router = useRouter();
-  const { data } = useSWR<ItemTypes>(
+  /*
+   SWR에는 bound mutate, unbound mutate 함수가 존재 
+   1. bound mutate -> mutate({}, boolean); 
+   첫번째 인자는 SWR로 불러온 data update할 사항, boolean은 mutate 후 다시 누르면 해당api 최신의 정보를 get
+
+   2. unbound mutate -> mutate('key값 (url)',{}, boolean);
+   해당 페이지 외 이 데이터가 바뀌면서 영향이 가는 다른 페이지를 update. 해당 컴포넌트에는 바꾸려고하는 data가 없기때문
+   mutate('url'); 만 적는다면 해당 api url을 refetch
+   -참고-
+
+   https://swr.vercel.app/ko/docs/mutation
+   https://swr.vercel.app/docs/mutation
+  */
+  const { data, mutate } = useSWR<ItemTypes>(
     router.query?.id ? `/api/products/${router.query.id}` : null
   )
-  console.log(data)
+
+  const [favorite] = useMutation(`/api/products/${router.query.id}/fav`);
+
+  const favoriteClick = () => {
+      if(!data) return;
+      // 데이터 update 후 다시 되돌릴때 isFavorite 외 다른 데이터들을 갱신시킬필요가 없으므로 2번째인자 false
+      // obj update 방식 -> data를 기존 data내 데이터들과 isFavorite 만 not으로 변경
+      // mutate({ ...data, isFavorite: !data.isFavorite }, false);
+      mutate((prev) => prev && { ...prev, isFavorite: !prev.isFavorite }, false);
+      favorite({});
+    }
+
   // * Loading 추가하기
   return (
     <Layout canGoBack hasTabBar>
@@ -48,21 +77,12 @@ const ItemDetail: NextPage = () => {
             </p>
             <div className="flex items-center justify-between space-x-2">
               <Button large text="Talk to seller" />
-              <button className="p-3 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-500">
-                <svg
-                  className="h-6 w-6 "
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
+              <button onClick={favoriteClick} className={cls(
+                "p-3 rounded-md flex items-center justify-center",
+                data?.isFavorite ? 'text-red-500 hover:bg-gray-100 hover:text-red-600' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-500'
+              )}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  < path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
                 </svg>
               </button>
             </div>
@@ -72,8 +92,8 @@ const ItemDetail: NextPage = () => {
           <h2 className="text-2xl font-bold text-gray-900">유사한 상품</h2>
             <div className=" mt-6 grid grid-cols-2 gap-4">
               {data?.similarItems ? data?.similarItems?.map((item) => (
-                <Link href={`/products/${item.id}`}>
-                  <div key={item?.id}>
+                <Link href={`/products/${item.id}`} key={item?.id}>
+                  <div>
                     <div className="h-56 w-full mb-4 bg-slate-300" />
                     <h3 className="text-gray-700 -mb-1"><b>{item.name}</b></h3>
                     <span className="text-sm font-medium text-gray-900">{item.price.toLocaleString()}원</span>

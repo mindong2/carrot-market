@@ -58,6 +58,8 @@ model User {
   updatedAt DateTime @updatedAt
   tokens Token[]
   products Product[]
+  // 유저가 좋아요 버튼누른 개수, 종류등 알수있음
+  favorites Favorite[]
 }
 
 model Token {
@@ -68,15 +70,16 @@ model Token {
   // Token 모델의 userId가 User모델의 id를 바라보고있다 따라서 userId가 User 모델의 id
   // onDlete: Cascade -> user가 삭제되었을때 Token(자식)도 함께삭제
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId Int
-  @@index([userId])
 }
 
 model Product {
   id Int @id @default(autoincrement())
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
   name String
   image String
   price Int
@@ -85,5 +88,18 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId Int
+  // 해당 상품이 몇개의 좋아요를 받았는지 알수있음
+  favorites Favorite[]
+}
+
+model Favorite  {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId])
+  userId Int
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@index([productId])
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

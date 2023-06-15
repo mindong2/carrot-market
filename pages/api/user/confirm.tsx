@@ -33,7 +33,7 @@ export default withApiSession(
     {
       methods:["POST"],
       handler,
-      isPrivate:true
+      isPrivate:false
     }
   )
   );

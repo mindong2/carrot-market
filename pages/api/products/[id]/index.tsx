@@ -4,7 +4,10 @@ import { withApiSession } from "@/libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
-  const { id } = req.query;
+  const {
+    query : {id},
+    session : {user}
+  } = req;
   const product = await client.product.findUnique({
     where: {
       id: Number(id),
@@ -39,7 +42,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       },
     },
   });
-  res.status(200).json({ success: true, product, similarItems });
+
+  const isFavorite = Boolean(await client.favorite.findFirst({
+    where: {
+      userId : user?.id,
+      productId: Number(id)
+    }
+  }))
+
+  res.status(200).json({ success: true, product, isFavorite, similarItems });
 }
 
 export default withApiSession(
