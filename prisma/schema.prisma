@@ -60,6 +60,9 @@ model User {
   products Product[]
   // 유저가 좋아요 버튼누른 개수, 종류등 알수있음
   favorites Favorite[]
+  posts Post[]
+  answers Answer[]
+  curiositys Curiosity[]
 }
 
 model Token {
@@ -75,6 +78,8 @@ model Token {
   updatedAt DateTime @updatedAt
   userId Int
 }
+
+// Home
 
 model Product {
   id Int @id @default(autoincrement())
@@ -102,4 +107,43 @@ model Favorite  {
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// 동네생활 (Community)
+model Post {
+  id Int @id @default(autoincrement())
+  question String @db.MediumText
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  userId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  answers Answer[]
+  curiositys Curiosity[]
+}
+
+// 동네생활 댓글 
+model Answer {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  userId Int
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  @@index([postId])
+  postId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+}
+
+// 동네생활 궁금해요
+model Curiosity {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  userId Int
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  @@index([postId])
+  postId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
 }
