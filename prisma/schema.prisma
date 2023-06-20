@@ -125,6 +125,7 @@ model Post {
 // 동네생활 댓글 
 model Answer {
   id Int @id @default(autoincrement())
+  answer String @db.MediumText
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId])
   userId Int
