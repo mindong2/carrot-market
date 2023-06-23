@@ -6,6 +6,9 @@ import { useRouter } from "next/router";
 import { Answer, Post, User } from "@prisma/client";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import useMutation from "@/libs/client/useMutation";
+import { cls } from "@/libs/client/utils";
+import { useEffect } from "react";
 
 interface Ianswer extends Answer {
   user: User;
@@ -15,6 +18,7 @@ interface IwriterData extends Post {
   user: User;
   _count: {
     answers: number;
+    curiositys: number;
   };
   answers: Ianswer[];
 }
@@ -22,6 +26,7 @@ interface IwriterData extends Post {
 interface IwriterResult {
   success: boolean;
   post: IwriterData;
+  isCurious: boolean;
 }
 
 interface description {
@@ -29,13 +34,49 @@ interface description {
 }
 
 const CommunityPostDetail: NextPage = () => {
-  const { register, handleSubmit } = useForm();
-  const onValid = (data: description) => {
-    console.log(data);
-  };
+  const { register, handleSubmit, reset } = useForm();
+  
   const router = useRouter();
-  const { data: writerData, error } = useSWR<IwriterResult>(`/api/post/${router.query.id}`);
-  console.log(router.query);
+  // 답변 작성
+  const [answer, {data:answerData, loading : answerDataLoading}] = useMutation(`/api/post/${router.query.id}/answer`);
+  // 궁금해요 클릭
+  const [curiosity] = useMutation(`/api/post/${router.query.id}/curiositys`)
+  const { data: writerData, error, mutate } = useSWR<IwriterResult>(router.query?.id ? `/api/post/${router.query.id}` : null);
+  
+  const onValid = (data: description) => {
+    if(answerDataLoading) return;
+    if(window.confirm('정말로 작성하시겠습니까?')){
+      answer(data);
+    }
+  };
+  
+  useEffect(() => {
+    if(answerData && answerData.success){
+      reset();
+      mutate();
+    }
+  }, [answerData, router])
+
+  const clickCurious = () => {
+    if(!writerData) return;
+    curiosity({});
+    mutate(
+      {...writerData,
+      post: {
+        ...writerData.post,
+        _count: {
+          ...writerData?.post?._count,
+          curiositys: writerData.isCurious ? writerData?.post._count.curiositys - 1 : writerData?.post._count.curiositys + 1
+        }
+      },
+      isCurious: !writerData?.isCurious
+      }, false
+    );
+  }
+
+
+
+  // console.log(writerData);
   return (
     <Layout canGoBack>
       {writerData ? (
@@ -56,10 +97,15 @@ const CommunityPostDetail: NextPage = () => {
             </div>
             <div className="mt-3 flex w-full space-x-5 border-b-[2px] border-t px-4 py-2.5  text-gray-700">
               <span className="flex items-center space-x-2 text-sm">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>궁금해요 1</span>
+                <button className={cls(
+                  "flex items-center space-x-1",
+                  writerData.isCurious ? "text-green-400" : ""
+                )} onClick={clickCurious}>
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>궁금해요 {writerData.post?._count.curiositys}</span>
+                </button>
               </span>
               <span className="flex items-center space-x-2 text-sm">
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -71,12 +117,12 @@ const CommunityPostDetail: NextPage = () => {
           </div>
           {writerData?.post?.answers.map((answer) => {
             return (
-              <div className="my-5 space-y-5 px-4">
+              <div className="my-5 space-y-5 px-4" key={answer.id}>
                 <div className="flex items-start space-x-3">
                   <div className="h-8 w-8 rounded-full bg-slate-200" />
                   <div>
                     <span className="block text-sm font-medium text-gray-700">{answer?.user?.name}</span>
-                    <span className="block text-xs text-gray-500 ">{answer?.user?.createdAt.toString()}</span>
+                    <span className="block text-xs text-gray-500 ">{new Date(answer?.createdAt).toLocaleString()}</span>
                     <p className="mt-2 text-gray-700">{answer?.answer}</p>
                   </div>
                 </div>

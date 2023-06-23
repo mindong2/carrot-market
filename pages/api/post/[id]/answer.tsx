@@ -4,49 +4,38 @@ import { withApiSession } from "@/libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
+  // product id
   const {
     query: { id },
+    session: { user },
+    body: { description }
   } = req;
 
-  const post = await client.post.findUnique({
-    where: {
-      id: Number(id),
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          avatar: true,
-        },
-      },
-      answers: {
-        select: {
-          answer: true,
-          id: true,
-          user: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
+  /* 
+    해당 curious에서 productId가 있는지 확인 (findUnique는 unique로만 검색가능하므로 relation으로 검색하기위해 findFirst)
+  */
+  const Answer = await client.answer.create({
+    data: {
+        answer: description,
+        user: {
+            connect: {
+            id: user?.id,
             },
-          },
         },
-      },
-      _count: {
-        select: {
-          answers: true,
+        post: {
+            connect: {
+            id: Number(id),
+            },
         },
-      },
     },
-  });
+});
 
-  res.status(200).json({ success: true, post });
+  res.status(200).json({ success: true, Answer });
 }
 
 export default withApiSession(
   withHandler({
-    methods: ["GET"],
+    methods: ["POST"],
     handler,
   })
 );
