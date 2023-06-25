@@ -4,25 +4,26 @@ import FloatingButton from "@/components/floating-button";
 import Layout from "@/components/layout";
 import useSWR from "swr";
 import { Post, User } from "@prisma/client";
+import useCoords from "@/libs/client/useCoords";
 
 interface IpostResult extends Post {
   user: User;
   _count: {
-    curiositys : number;
+    curiositys: number;
     answers: number;
-  }
+  };
 }
 
-interface Ipost { 
+interface Ipost {
   success: boolean;
-  post: IpostResult[]
+  post: IpostResult[];
 }
-
 
 const Community: NextPage = () => {
+  const { latitude, longitude } = useCoords();
 
-  const {data} = useSWR<Ipost>('/api/post')
-  console.log(data)
+  const { data } = useSWR<Ipost>(latitude && longitude ? `/api/post?latitude=${latitude}?longitude=${longitude}` : null);
+  console.log(data);
   return (
     <Layout hasTabBar title="동네생활">
       <div className="space-y-4 divide-y-[2px]">
