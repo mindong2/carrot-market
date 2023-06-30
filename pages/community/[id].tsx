@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import useMutation from "@/libs/client/useMutation";
 import { cls } from "@/libs/client/utils";
 import { useEffect } from "react";
+import useUser from "@/libs/client/useUser";
 
 interface Ianswer extends Answer {
   user: User;
@@ -35,46 +36,47 @@ interface description {
 
 const CommunityPostDetail: NextPage = () => {
   const { register, handleSubmit, reset } = useForm();
-  
+  const { user, isLoading } = useUser();
+
   const router = useRouter();
   // 답변 작성
-  const [answer, {data:answerData, loading : answerDataLoading}] = useMutation(`/api/post/${router.query.id}/answer`);
+  const [answer, { data: answerData, loading: answerDataLoading }] = useMutation(`/api/post/${router.query.id}/answer`);
   // 궁금해요 클릭
-  const [curiosity] = useMutation(`/api/post/${router.query.id}/curiositys`)
+  const [curiosity] = useMutation(`/api/post/${router.query.id}/curiositys`);
   const { data: writerData, error, mutate } = useSWR<IwriterResult>(router.query?.id ? `/api/post/${router.query.id}` : null);
-  
+
   const onValid = (data: description) => {
-    if(answerDataLoading) return;
-    if(window.confirm('정말로 작성하시겠습니까?')){
+    if (answerDataLoading) return;
+    if (window.confirm("정말로 작성하시겠습니까?")) {
       answer(data);
     }
   };
-  
+
   useEffect(() => {
-    if(answerData && answerData.success){
+    if (answerData && answerData.success) {
       reset();
       mutate();
     }
-  }, [answerData, router])
+  }, [answerData, router]);
 
   const clickCurious = () => {
-    if(!writerData) return;
+    if (!writerData) return;
     curiosity({});
     mutate(
-      {...writerData,
-      post: {
-        ...writerData.post,
-        _count: {
-          ...writerData?.post?._count,
-          curiositys: writerData.isCurious ? writerData?.post._count.curiositys - 1 : writerData?.post._count.curiositys + 1
-        }
+      {
+        ...writerData,
+        post: {
+          ...writerData.post,
+          _count: {
+            ...writerData?.post?._count,
+            curiositys: writerData.isCurious ? writerData?.post._count.curiositys - 1 : writerData?.post._count.curiositys + 1,
+          },
+        },
+        isCurious: !writerData?.isCurious,
       },
-      isCurious: !writerData?.isCurious
-      }, false
+      false
     );
-  }
-
-
+  };
 
   // console.log(writerData);
   return (
@@ -97,10 +99,7 @@ const CommunityPostDetail: NextPage = () => {
             </div>
             <div className="mt-3 flex w-full space-x-5 border-b-[2px] border-t px-4 py-2.5  text-gray-700">
               <span className="flex items-center space-x-2 text-sm">
-                <button className={cls(
-                  "flex items-center space-x-1",
-                  writerData.isCurious ? "text-green-400" : ""
-                )} onClick={clickCurious}>
+                <button className={cls("flex items-center space-x-1", writerData.isCurious ? "text-green-400" : "")} onClick={clickCurious}>
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>

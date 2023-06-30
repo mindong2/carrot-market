@@ -8,6 +8,7 @@ import useMutation from "@/libs/client/useMutation";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Product } from "@prisma/client";
+import useUser from "@/libs/client/useUser";
 
 interface UploadProductsType {
   name: string;
@@ -22,6 +23,7 @@ interface ProductMutationType {
 }
 
 const Upload: NextPage = () => {
+  const { user, isLoading } = useUser();
   const router = useRouter();
   const { register, handleSubmit } = useForm<UploadProductsType>();
   const [uploadProduct, { data: productData, loading }] = useMutation<ProductMutationType>("/api/products");
