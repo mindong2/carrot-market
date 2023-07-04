@@ -63,6 +63,10 @@ model User {
   posts Post[]
   answers Answer[]
   curiositys Curiosity[]
+  writtenReviews Review[] @relation(name: "writtenReviews")
+  receiveReviews Review[] @relation(name: "receiveReviews")
+  purchases Purchase[]
+  sales Sale[]
 }
 
 model Token {
@@ -95,18 +99,8 @@ model Product {
   userId Int
   // 해당 상품이 몇개의 좋아요를 받았는지 알수있음
   favorites Favorite[]
-}
-
-model Favorite  {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId])
-  userId Int
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  @@index([productId])
-  productId Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  purchases Purchase[]
+  sales Sale[]
 }
 
 // 동네생활 (Community)
@@ -150,3 +144,68 @@ model Curiosity {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt 
 }
+
+model Review {
+  // 데이터베이스가 이미 존재하는 모델의 schema를 변경하고자 할때
+
+  // 1. 기존 데이터 베이스를 지운 후 생성 (비추천)
+  // 2. 새로 추가되는 필드를 옵셔널하게 생성 -> Int? 와 같이
+  // 3. @default(value)를 입력하여 기존 데이터에도 추가되도록 설정
+
+  id Int @id @default(autoincrement())
+  review String @db.MediumText
+  // 한 모델에서 다른모델을 2번 참조할때 name을 지정하고 해당 model에서 relation 지정
+  createdBy User @relation(name: "writtenReviews", fields: [createdById], references: [id], onDelete: Cascade)
+  @@index([createdById])
+  createdById Int
+  createdFor User @relation(name: "receiveReviews", fields: [createdForId], references: [id], onDelete: Cascade)
+  createdForId Int
+  @@index([createdForId])
+  scroe Int @default(5)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+}
+
+model Favorite  {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  userId Int
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@index([productId])
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Purchase  {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  userId Int
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@index([productId])
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Sale  {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  userId Int
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@index([productId])
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Favorite, Purchase, Sale 이 세 모델이 같으므로 kind Kind 를 넣고
+// enum을 만들면 하나로 축약이 가능하지만 frontend에서 수정할게 많아지므로 이번에는 따로생성
+// enum Kind {
+//   Favorite
+//   Purchase
+//   Sale
+// } 
