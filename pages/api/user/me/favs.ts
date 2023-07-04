@@ -7,8 +7,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   const {
     session: { user },
   } = req;
-  const favorites = await client.favorite.findMany({
-    where: { id: user?.id },
+  const favs = await client.favorite.findMany({
+    where: { userId: user?.id },
     include: {
       product: {
         include: {
@@ -23,7 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   });
 
   if (req.session.user) {
-    return res.json({ success: true, favorites });
+    return res.json({ success: true, favs });
   } else {
     return res.json({ success: false });
   }

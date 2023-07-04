@@ -1,211 +1,153 @@
-// Prisma 셋업 (Typescript + MySQL)
-
-// 1. npm install prisma -D
-
-// 2. npx prisma init
-// 이 명령은 schema.prisma라는 파일과 프로젝트 루트에 .env 파일을 포함하는 prisma라는 새 디렉토리를 생성했습니다. schema.prisma는 데이터베이스 연결과 Prisma Client 생성기가 있는 Prisma 스키마를 포함합니다. .env는 환경 변수를 정의하기 위한 dotenv 파일입니다. (데이터베이스 연결에 사용됨)
-// https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases-typescript-mysql
-
-// Prisma Model 예시
-// https://www.prisma.io/docs/concepts/components/prisma-schema
-
-// VSCode Prisma Extension
-// https://marketplace.visualstudio.com/items?itemName=Prisma.prisma
-
-// Planet Scale cli 설치 (윈도우)
-// 1. Scoop 설치 (Windows용 커맨드 라인 설치 프로그램)
-// https://scoop.sh/
-// 2. scoop bucket add pscale https://github.com/planetscale/scoop-bucket.git
-// 3. scoop install pscale mysql
-// 4. scoop update pscale
-
-// PlanetScale CLI를 사용하여 데이터베이스를 생성
-// 먼저 pscale auth login 으로 로그인
-// pscale database create yourDB --region ap-northeast
-
-// 보안 터널을 통해 PlanetScale과 컴퓨터를 연결할 수 있다
-
-// `pscale connect yourDB`
-
-// pscale 에서 제공하는 URL을 데이터베이스에 연결
-
-// .env 파일 내 `DATABASE_URL="mysql://127.0.0.1:3306/yourDB"`
-
-// schema를 Planet Scale 에 push -> npx prisma db push
-
-// prisma 관리자 패널 ->  npx prisma studio
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-  // vitess에서는 foreign key가 없어도 오류를 내지 않기때문에 prisma에서 제약이 있도록 만든다.
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
 model User {
-  // @id -> model의 id 유니크 식별자
-  // 필수적이지 않은 선택적인 옵션은 ?를 붙혀준다. (require X)
-  id Int @id @default(autoincrement())
-  phone String? @unique
-  email String? @unique
-  name String //require
-  avatar String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tokens Token[]
-  products Product[]
-  // 유저가 좋아요 버튼누른 개수, 종류등 알수있음
-  favorites Favorite[]
-  posts Post[]
-  answers Answer[]
-  curiositys Curiosity[]
-  writtenReviews Review[] @relation(name: "writtenReviews")
-  receiveReviews Review[] @relation(name: "receiveReviews")
-  purchases Purchase[]
-  sales Sale[]
+  id             Int         @id @default(autoincrement())
+  phone          String?     @unique
+  email          String?     @unique
+  name           String
+  avatar         String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  tokens         Token[]
+  products       Product[]
+  favorites      Favorite[]
+  posts          Post[]
+  answers        Answer[]
+  curiositys     Curiosity[]
+  writtenReviews Review[]    @relation("writtenReviews")
+  receiveReviews Review[]    @relation("receiveReviews")
+  purchases      Purchase[]
+  sales          Sale[]
 }
 
 model Token {
-  // @id -> model의 id 유니크 식별자
-  // 필수적이지 않은 선택적인 옵션은 ?를 붙혀준다. (require X)
-  id Int @id @default(autoincrement())
-  payload String @unique
-  // Token 모델의 userId가 User모델의 id를 바라보고있다 따라서 userId가 User 모델의 id
-  // onDlete: Cascade -> user가 삭제되었을때 Token(자식)도 함께삭제
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId])
+  id        Int      @id @default(autoincrement())
+  payload   String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId Int
-}
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-// Home
+  @@index([userId])
+}
 
 model Product {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          Int        @id @default(autoincrement())
+  name        String
+  image       String
+  price       Int
+  description String     @db.MediumText
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favorites   Favorite[]
+  purchases   Purchase[]
+  sales       Sale[]
+
   @@index([userId])
-  name String
-  image String
-  price Int
-  // @db로 정확한 field setting가능
-  description String @db.MediumText
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId Int
-  // 해당 상품이 몇개의 좋아요를 받았는지 알수있음
-  favorites Favorite[]
-  purchases Purchase[]
-  sales Sale[]
 }
 
-// 동네생활 (Community)
 model Post {
-  id Int @id @default(autoincrement())
-  question String @db.MediumText
-  latitude Float?
-  longitude Float?
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         Int         @id @default(autoincrement())
+  question   String      @db.MediumText
+  userId     Int
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  latitude   Float?
+  longitude  Float?
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers    Answer[]
+  curiositys Curiosity[]
+
   @@index([userId])
-  userId Int
+}
+
+model Answer {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  answers Answer[]
-  curiositys Curiosity[]
-}
+  answer    String   @db.MediumText
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-// 동네생활 댓글 
-model Answer {
-  id Int @id @default(autoincrement())
-  answer String @db.MediumText
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId])
-  userId Int
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   @@index([postId])
-  postId Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
 }
 
-// 동네생활 궁금해요
 model Curiosity {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId])
-  userId Int
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  @@index([postId])
-  postId Int
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([postId])
 }
 
 model Review {
-  // 데이터베이스가 이미 존재하는 모델의 schema를 변경하고자 할때
-
-  // 1. 기존 데이터 베이스를 지운 후 생성 (비추천)
-  // 2. 새로 추가되는 필드를 옵셔널하게 생성 -> Int? 와 같이
-  // 3. @default(value)를 입력하여 기존 데이터에도 추가되도록 설정
-
-  id Int @id @default(autoincrement())
-  review String @db.MediumText
-  // 한 모델에서 다른모델을 2번 참조할때 name을 지정하고 해당 model에서 relation 지정
-  createdBy User @relation(name: "writtenReviews", fields: [createdById], references: [id], onDelete: Cascade)
-  @@index([createdById])
-  createdById Int
-  createdFor User @relation(name: "receiveReviews", fields: [createdForId], references: [id], onDelete: Cascade)
+  id           Int      @id @default(autoincrement())
+  review       String   @db.MediumText
+  createdById  Int
   createdForId Int
+  scroe        Int      @default(5)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    User     @relation("writtenReviews", fields: [createdById], references: [id], onDelete: Cascade)
+  createdFor   User     @relation("receiveReviews", fields: [createdForId], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
   @@index([createdForId])
-  scroe Int @default(5)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
 }
 
-model Favorite  {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId])
-  userId Int
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  @@index([productId])
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([productId])
 }
 
-model Purchase  {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId])
-  userId Int
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  @@index([productId])
+model Purchase {
+  id        Int      @id @default(autoincrement())
+  userId    Int
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([productId])
 }
 
-model Sale  {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId])
-  userId Int
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  @@index([productId])
+model Sale {
+  id        Int      @id @default(autoincrement())
+  userId    Int
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-// Favorite, Purchase, Sale 이 세 모델이 같으므로 kind Kind 를 넣고
-// enum을 만들면 하나로 축약이 가능하지만 frontend에서 수정할게 많아지므로 이번에는 따로생성
-// enum Kind {
-//   Favorite
-//   Purchase
-//   Sale
-// } 
+  @@index([userId])
+  @@index([productId])
+}
