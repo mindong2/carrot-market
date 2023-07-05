@@ -8,6 +8,7 @@ import { Product, User } from "@prisma/client";
 import useMutation from "@/libs/client/useMutation";
 import { cls } from "@/libs/client/utils";
 import useUser from "@/libs/client/useUser";
+import Spinner from "@/components/spinner";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -36,7 +37,9 @@ const ItemDetail: NextPage = () => {
    https://swr.vercel.app/ko/docs/mutation
    https://swr.vercel.app/docs/mutation
   */
-  const { data, mutate } = useSWR<ItemTypes>(router.query?.id ? `/api/products/${router.query.id}` : null);
+  const { data, mutate } = useSWR<ItemTypes>(
+    router.query?.id ? `/api/products/${router.query.id}` : null
+  );
 
   const [favorite] = useMutation(`/api/products/${router.query.id}/fav`);
 
@@ -51,56 +54,84 @@ const ItemDetail: NextPage = () => {
 
   // * Loading 추가하기
   return (
-    <Layout canGoBack hasTabBar>
-      <div className="px-4  py-4">
-        <div className="mb-8">
-          <div className="h-96 bg-slate-300" />
-          <div className="flex cursor-pointer items-center space-x-3 border-b border-t py-3">
-            <div className="h-12 w-12 rounded-full bg-slate-300" />
-            <div>
-              <p className="text-sm font-medium text-gray-700">{data?.product?.user?.name}</p>
-              <Link href={`/user/profile/${data?.product?.user?.id}`} className="text-xs font-medium text-gray-500">
-                View profile &rarr;
-              </Link>
-            </div>
-          </div>
-          <div className="mt-5">
-            <h1 className="text-3xl font-bold text-gray-900">{data?.product?.name}</h1>
-            <span className="mt-3 block text-2xl text-gray-900">
-              {/* toLocaleString() 천단위 콤마 */}
-              <b>{data?.product?.price.toLocaleString()}</b>원
-            </span>
-            <p className=" my-6 text-gray-700">{data?.product?.description}</p>
-            <div className="flex items-center justify-between space-x-2">
-              <Button large text="Talk to seller" />
-              <button onClick={favoriteClick} className={cls("flex items-center justify-center rounded-md p-3", data?.isFavorite ? "text-red-500 hover:bg-gray-100 hover:text-red-600" : "text-gray-400 hover:bg-gray-100 hover:text-gray-500")}>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">유사한 상품</h2>
-          <div className=" mt-6 grid grid-cols-2 gap-4">
-            {data?.similarItems
-              ? data?.similarItems?.map((item) => (
-                  <Link href={`/products/${item.id}`} key={item?.id}>
-                    <div>
-                      <div className="mb-4 h-56 w-full bg-slate-300" />
-                      <h3 className="-mb-1 text-gray-700">
-                        <b>{item.name}</b>
-                      </h3>
-                      <span className="text-sm font-medium text-gray-900">{item.price.toLocaleString()}원</span>
-                    </div>
+    <>
+      {data ? (
+        <Layout canGoBack hasTabBar>
+          <div className="px-4  py-4">
+            <div className="mb-8">
+              <div className="h-96 bg-slate-300" />
+              <div className="flex cursor-pointer items-center space-x-3 border-b border-t py-3">
+                <div className="h-12 w-12 rounded-full bg-slate-300" />
+                <div>
+                  <p className="text-sm font-medium text-gray-700">{data?.product?.user?.name}</p>
+                  <Link
+                    href={`/user/profile/${data?.product?.user?.id}`}
+                    className="text-xs font-medium text-gray-500"
+                  >
+                    View profile &rarr;
                   </Link>
-                ))
-              : null}
+                </div>
+              </div>
+              <div className="mt-5">
+                <h1 className="text-3xl font-bold text-gray-900">{data?.product?.name}</h1>
+                <span className="mt-3 block text-2xl text-gray-900">
+                  {/* toLocaleString() 천단위 콤마 */}
+                  <b>{data?.product?.price.toLocaleString()}</b>원
+                </span>
+                <p className=" my-6 text-gray-700">{data?.product?.description}</p>
+                <div className="flex items-center justify-between space-x-2">
+                  <Button large text="Talk to seller" />
+                  <button
+                    onClick={favoriteClick}
+                    className={cls(
+                      "flex items-center justify-center rounded-md p-3",
+                      data?.isFavorite
+                        ? "text-red-500 hover:bg-gray-100 hover:text-red-600"
+                        : "text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+                    )}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">유사한 상품</h2>
+              <div className=" mt-6 grid grid-cols-2 gap-4">
+                {data?.similarItems
+                  ? data?.similarItems?.map((item) => (
+                      <Link href={`/products/${item.id}`} key={item?.id}>
+                        <div>
+                          <div className="mb-4 h-56 w-full bg-slate-300" />
+                          <h3 className="-mb-1 text-gray-700">
+                            <b>{item.name}</b>
+                          </h3>
+                          <span className="text-sm font-medium text-gray-900">
+                            {item.price.toLocaleString()}원
+                          </span>
+                        </div>
+                      </Link>
+                    ))
+                  : null}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </Layout>
+        </Layout>
+      ) : (
+        <Spinner />
+      )}
+    </>
   );
 };
 

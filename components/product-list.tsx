@@ -18,7 +18,6 @@ interface ProductListResponse {
 
 const ProductList = ({ kind }: IKind) => {
   const { data } = useSWR<ProductListResponse>(`/api/user/me/${kind}`);
-  console.log(data);
   return (
     <div className="flex flex-col space-y-5 divide-y  pb-10">
       {data

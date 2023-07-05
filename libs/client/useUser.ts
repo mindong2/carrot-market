@@ -1,11 +1,17 @@
 // 유저 데이터 불러오는 hook
+import { User } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import useSWR from "swr";
 
+interface Iuser {
+  success: boolean;
+  profile: User;
+}
+
 export default function useUser() {
   // const { data, error } = useSWR('/api/user/me', fetcher)
-  const { data, error } = useSWR("/api/user/me");
+  const { data, error } = useSWR<Iuser>("/api/user/me");
   const router = useRouter();
   /* 
         로그인이 안된 상태라면 로그인창으로 이동 (prev history를 남기고싶지않을때 replace)

@@ -20,8 +20,19 @@ export default function Layout({ title, canGoBack, hasTabBar, children }: Layout
       <div className="fixed top-0 flex h-12 w-full max-w-xl items-center justify-center  border-b bg-white px-10 text-lg  font-medium text-gray-800">
         {canGoBack ? (
           <button onClick={onClick} className="absolute left-4">
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
             </svg>
           </button>
         ) : null}
@@ -37,7 +48,13 @@ export default function Layout({ title, canGoBack, hasTabBar, children }: Layout
               router.pathname === "/" ? "text-orange-500" : "transition-colors hover:text-gray-500"
             )}
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -51,10 +68,18 @@ export default function Layout({ title, canGoBack, hasTabBar, children }: Layout
             href="/community"
             className={cls(
               "flex flex-col items-center space-y-2 ",
-              router.pathname === "/community" ? "text-orange-500" : "transition-colors hover:text-gray-500"
+              router.pathname === "/community"
+                ? "text-orange-500"
+                : "transition-colors hover:text-gray-500"
             )}
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -68,10 +93,18 @@ export default function Layout({ title, canGoBack, hasTabBar, children }: Layout
             href="/chats"
             className={cls(
               "flex flex-col items-center space-y-2 ",
-              router.pathname === "/chats" ? "text-orange-500" : "transition-colors hover:text-gray-500"
+              router.pathname === "/chats"
+                ? "text-orange-500"
+                : "transition-colors hover:text-gray-500"
             )}
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -82,13 +115,21 @@ export default function Layout({ title, canGoBack, hasTabBar, children }: Layout
             <span>채팅</span>
           </Link>
           <Link
-            href="/live"
+            href="/stream"
             className={cls(
               "flex flex-col items-center space-y-2 ",
-              router.pathname === "/live" ? "text-orange-500" : "transition-colors hover:text-gray-500"
+              router.pathname === "/stream"
+                ? "text-orange-500"
+                : "transition-colors hover:text-gray-500"
             )}
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -102,10 +143,18 @@ export default function Layout({ title, canGoBack, hasTabBar, children }: Layout
             href="/profile"
             className={cls(
               "flex flex-col items-center space-y-2 ",
-              router.pathname === "/profile" ? "text-orange-500" : "transition-colors hover:text-gray-500"
+              router.pathname === "/profile"
+                ? "text-orange-500"
+                : "transition-colors hover:text-gray-500"
             )}
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
