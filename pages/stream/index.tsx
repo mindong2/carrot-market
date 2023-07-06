@@ -2,19 +2,38 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import FloatingButton from "@/components/floating-button";
 import Layout from "@/components/layout";
+import useSWR from "swr";
+import { Stream } from "@prisma/client";
+import { useRouter } from "next/router";
 
-const Live: NextPage = () => {
+export interface IStream {
+  success: boolean;
+  stream: Stream[];
+}
+
+const Stream: NextPage = () => {
+  const router = useRouter();
+  console.log(router.query);
+  // pagination 구현 준비
+  const { data } = useSWR<IStream>(`/api/stream?page=${router.query.page}`);
+
   return (
     <Layout hasTabBar title="라이브">
       <div className=" space-y-4 divide-y-[1px]">
-        {[1, 1, 1, 1, 1, 1, 1].map((_, i) => (
-          <Link key={i} href={`/live/${i}`} className="block px-4  pt-4">
+        {data?.stream?.map((live) => (
+          <Link key={live?.id} href={`/stream/${live?.id}`} className="block px-4  pt-4">
             <div className="aspect-video w-full rounded-md bg-slate-300 shadow-sm" />
-            <h1 className="mt-2 text-2xl font-bold text-gray-900">Galaxy S50</h1>
+            <h1 className="mt-2 text-2xl font-bold text-gray-900">{live?.title}</h1>
           </Link>
         ))}
-        <FloatingButton href="/live/create">
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <FloatingButton href="/stream/create">
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -28,4 +47,4 @@ const Live: NextPage = () => {
   );
 };
 
-export default Live;
+export default Stream;

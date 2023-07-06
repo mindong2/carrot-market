@@ -115,7 +115,7 @@ export default function Layout({ title, canGoBack, hasTabBar, children }: Layout
             <span>채팅</span>
           </Link>
           <Link
-            href="/stream"
+            href="/stream?page=1"
             className={cls(
               "flex flex-col items-center space-y-2 ",
               router.pathname === "/stream"

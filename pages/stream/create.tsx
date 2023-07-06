@@ -5,7 +5,7 @@ import Layout from "@/components/layout";
 import TextArea from "@/components/textarea";
 import { useForm } from "react-hook-form";
 import useMutation from "@/libs/client/useMutation";
-import { Stream } from "stream";
+import { Stream } from "@prisma/client";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 
@@ -17,23 +17,25 @@ interface Iform {
 
 interface IStream {
   success: boolean;
-  stream: Stream[];
+  stream: Stream;
 }
 
 const Create: NextPage = () => {
   const router = useRouter();
   const { register, handleSubmit } = useForm<Iform>();
-  const [stream, { loading, data }] = useMutation<IStream>("/api/stream");
+  const [stream, { data, loading }] = useMutation<IStream>("/api/stream");
   const onValid = (form: Iform) => {
     if (loading) return;
-    console.log(form);
+    if (window.confirm("정말 라이브를 켜시겠습니까?")) {
+      stream(form);
+    }
   };
 
   useEffect(() => {
     if (data && data.success) {
-      router.push(`/streams/${data?.stream?.id}`);
+      router.push(`/stream/${data.stream?.id}`);
     }
-  }, [data]);
+  }, [data, router]);
   return (
     <Layout canGoBack title="Go Live">
       <form className=" space-y-4 px-4 py-10" onSubmit={handleSubmit(onValid)}>
@@ -45,7 +47,8 @@ const Create: NextPage = () => {
           type="text"
         />
         <Input
-          register={register("price", { required: true })}
+          //  valueAsNumber: 해당 value를 number값으로 바꿔준다
+          register={register("price", { required: true, valueAsNumber: true })}
           required
           label="Price"
           placeholder="0.00"
@@ -58,7 +61,7 @@ const Create: NextPage = () => {
           name="description"
           label="Description"
         />
-        <Button text="Go live" />
+        <Button text={loading ? "방송 생성중..." : "방송 시작하기"} />
       </form>
     </Layout>
   );
