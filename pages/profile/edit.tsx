@@ -4,7 +4,7 @@ import Input from "../../components/input";
 import Layout from "../../components/layout";
 import useUser from "@/libs/client/useUser";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useMutation from "@/libs/client/useMutation";
 import { useRouter } from "next/router";
 import { User } from "@prisma/client";
@@ -13,6 +13,7 @@ interface Iform {
   name: string;
   email: string;
   phone: string;
+  avatar: FileList;
 }
 
 interface editFormType {
@@ -24,15 +25,17 @@ interface editFormType {
 const EditProfile: NextPage = () => {
   const { user } = useUser();
   const [edit, { data, loading }] = useMutation<editFormType>("/api/user/me");
+  const [avatarPreview, setAvatarPreview] = useState("");
   const router = useRouter();
   const {
     register,
     handleSubmit,
     setValue,
     setError,
+    watch,
     formState: { errors },
   } = useForm<Iform>();
-  const onValid = ({ name, email, phone }: Iform) => {
+  const onValid = ({ name, email, phone, avatar }: Iform) => {
     if (name === "") {
       setError("root", { message: "이름은 필수입니다." });
       return;
@@ -50,6 +53,16 @@ const EditProfile: NextPage = () => {
       edit({ name, email, phone });
     }
   };
+
+  const avatar = watch("avatar");
+
+  useEffect(() => {
+    if (avatar && avatar.length > 0) {
+      const file = avatar[0];
+      // URL.createObjectURL(file) -> 주어진 객체를 가리키는 URL을 DOMString으로 반환
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  }, [avatar]);
 
   useEffect(() => {
     if (user?.name) setValue("name", user?.name);
@@ -70,13 +83,23 @@ const EditProfile: NextPage = () => {
     <Layout canGoBack title="Edit Profile">
       <form className="space-y-4 px-4 py-10" onSubmit={handleSubmit(onValid)}>
         <div className="flex items-center space-x-3">
-          <div className="h-14 w-14 rounded-full bg-slate-500" />
+          {avatar.length > 0 ? (
+            <img src={avatarPreview} className="h-14 w-14 rounded-full bg-slate-500" />
+          ) : (
+            <div className="h-14 w-14 rounded-full bg-slate-500"></div>
+          )}
           <label
             htmlFor="picture"
             className="cursor-pointer rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             Change
-            <input id="picture" type="file" className="hidden" accept="image/*" />
+            <input
+              {...register("avatar")}
+              id="picture"
+              type="file"
+              className="hidden"
+              accept="image/*"
+            />
           </label>
         </div>
         <Input register={register("name")} required label="이름" name="text" type="text" />
