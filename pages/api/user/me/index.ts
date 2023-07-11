@@ -17,23 +17,42 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
 
   if (req.method === "POST") {
     const {
-      body: { name, email, phone },
+      body: { name, email, phone, avatarId },
     } = req;
-    const updateProfile = await client.user.update({
-      where: {
-        id: req.session.user?.id,
-      },
-      data: {
-        name,
-        email,
-        phone,
-      },
-    });
 
-    if (updateProfile) {
-      return res.json({ success: true, updateProfile, fail: false });
+    if (avatarId) {
+      const updateProfile = await client.user.update({
+        where: {
+          id: req.session.user?.id,
+        },
+        data: {
+          name,
+          email,
+          phone,
+          avatar: avatarId,
+        },
+      });
+      if (updateProfile) {
+        return res.json({ success: true, updateProfile, fail: false });
+      } else {
+        return res.json({ success: false, fail: true });
+      }
     } else {
-      return res.json({ success: false, fail: true });
+      const updateProfile = await client.user.update({
+        where: {
+          id: req.session.user?.id,
+        },
+        data: {
+          name,
+          email,
+          phone,
+        },
+      });
+      if (updateProfile) {
+        return res.json({ success: true, updateProfile, fail: false });
+      } else {
+        return res.json({ success: false, fail: true });
+      }
     }
   }
 }

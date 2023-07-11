@@ -35,7 +35,7 @@ const EditProfile: NextPage = () => {
     watch,
     formState: { errors },
   } = useForm<Iform>();
-  const onValid = ({ name, email, phone, avatar }: Iform) => {
+  const onValid = async ({ name, email, phone, avatar }: Iform) => {
     if (name === "") {
       setError("root", { message: "이름은 필수입니다." });
       return;
@@ -50,14 +50,31 @@ const EditProfile: NextPage = () => {
     if (loading) return;
 
     if (window.confirm("정말로 수정하시겠습니까?")) {
-      edit({ name, email, phone });
+      if (avatar && avatar?.length > 0) {
+        // https://developers.cloudflare.com/images/cloudflare-images/upload-images/direct-creator-upload/#direct-creator-upload -> API설명란
+        const { uploadURL } = await (await fetch("/api/files")).json();
+
+        const form = new FormData();
+        form.append("file", avatar[0], String(user?.id));
+        const {
+          result: { id: avatarId },
+        } = await (
+          await fetch(uploadURL, {
+            method: "POST",
+            body: form,
+          })
+        ).json();
+        edit({ name, email, phone, avatarId });
+      } else {
+        edit({ name, email, phone });
+      }
     }
   };
 
   const avatar = watch("avatar");
 
   useEffect(() => {
-    if (avatar && avatar.length > 0) {
+    if (avatar && avatar?.length > 0) {
       const file = avatar[0];
       // URL.createObjectURL(file) -> 주어진 객체를 가리키는 URL을 DOMString으로 반환
       setAvatarPreview(URL.createObjectURL(file));
@@ -83,7 +100,7 @@ const EditProfile: NextPage = () => {
     <Layout canGoBack title="Edit Profile">
       <form className="space-y-4 px-4 py-10" onSubmit={handleSubmit(onValid)}>
         <div className="flex items-center space-x-3">
-          {avatar.length > 0 ? (
+          {avatar?.length > 0 ? (
             <img src={avatarPreview} className="h-14 w-14 rounded-full bg-slate-500" />
           ) : (
             <div className="h-14 w-14 rounded-full bg-slate-500"></div>
@@ -135,3 +152,19 @@ const EditProfile: NextPage = () => {
 };
 
 export default EditProfile;
+
+/*
+  Direct Creator Upload
+  
+  유저의 브라우저가 cloudflare에 다이렉트로 업로드할 수 있습니다.
+  Cloudflare 이미지의 Direct Creator Upload 기능을 사용하면 사용자가 일회성 업로드 URL로 사진을 업로드할 수 있습니다. Direct Creator Upload를 사용하면 API 키 또는 토큰을 클라이언트에 노출하지 않고 업로드를 수락할 수 있습니다.
+  또한 중간 스토리지 버킷 및 이와 관련된 스토리지/송신 비용이 필요하지 않습니다.
+  ```
+  curl --request POST \
+  --url https://api.cloudflare.com/client/v4/accounts//images/v2/direct_upload \
+  --header 'Authorization: Bearer :token' \
+  --form 'requireSignedURLs=true' \
+  --form 'metadata={"key":"value"}'
+  ```
+  https://developers.cloudflare.com/images/cloudflare-images/upload-images/direct-creator-upload/ 
+*/
