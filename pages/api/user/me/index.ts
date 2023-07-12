@@ -17,13 +17,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
 
   if (req.method === "POST") {
     const {
+      session: { user },
       body: { name, email, phone, avatarId },
     } = req;
 
     if (avatarId) {
       const updateProfile = await client.user.update({
         where: {
-          id: req.session.user?.id,
+          id: user?.id,
         },
         data: {
           name,

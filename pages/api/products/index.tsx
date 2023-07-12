@@ -6,14 +6,14 @@ import { NextApiRequest, NextApiResponse } from "next";
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   if (req.method === "POST") {
     const {
-      body: { name, price, description },
+      body: { name, price, description, image },
       session: { user },
     } = req;
 
     const product = await client.product.create({
       data: {
         name,
-        image: "xx",
+        image,
         price: Number(price),
         description,
         user: {

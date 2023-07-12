@@ -6,13 +6,18 @@ interface ItemProps {
   price: number;
   comments?: number;
   hearts: number;
+  imgSrc?: string;
 }
 
-export default function Item({ title, price, comments, hearts, id }: ItemProps) {
+export default function Item({ title, price, comments, hearts, id, imgSrc }: ItemProps) {
   return (
     <Link href={`/products/${id}`} className="flex cursor-pointer justify-between px-4 pt-5">
       <div className="flex space-x-4">
-        <div className="h-20 w-20 rounded-md bg-gray-400" />
+        {imgSrc ? (
+          <img src={imgSrc} className="h-20 w-20 rounded-md bg-gray-400" />
+        ) : (
+          <div className="h-20 w-20 rounded-md bg-gray-400"></div>
+        )}
         <div className="flex flex-col pt-2">
           <h3 className="text-sm font-medium text-gray-900">{title}</h3>
           <span className="mt-1 font-medium text-gray-900">{price.toLocaleString()}원</span>
@@ -20,7 +25,13 @@ export default function Item({ title, price, comments, hearts, id }: ItemProps) 
       </div>
       <div className="flex items-end justify-end space-x-2">
         <div className="flex items-center space-x-0.5 text-sm  text-gray-600">
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

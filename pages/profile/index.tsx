@@ -3,7 +3,7 @@ import Link from "next/link";
 import Layout from "../../components/layout";
 import useSWR from "swr";
 import { Review, User } from "@prisma/client";
-import { cls } from "@/libs/client/utils";
+import { cloudflareGetImage, cls } from "@/libs/client/utils";
 import useUser from "@/libs/client/useUser";
 import Spinner from "@/components/spinner";
 
@@ -34,7 +34,7 @@ const Profile: NextPage = () => {
               {user?.avatar ? (
                 <img
                   // 맨끝이 public이 아닌 avatar -> CF 페이지에서 variance 추가
-                  src={`https://imagedelivery.net/QudHS_0d12Nos5oqyCqLbw/${user?.avatar}/avatar`}
+                  src={cloudflareGetImage(user?.avatar, "avatar")}
                   className="h-16 w-16 rounded-full bg-slate-500"
                 />
               ) : (
@@ -50,7 +50,13 @@ const Profile: NextPage = () => {
             <div className="mt-10 flex justify-around">
               <Link href="/profile/sold" className="flex flex-col items-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -63,15 +69,32 @@ const Profile: NextPage = () => {
               </Link>
               <Link href="/profile/bought" className="flex flex-col items-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                    ></path>
                   </svg>
                 </div>
                 <span className="mt-2 text-sm font-medium text-gray-700">구매내역</span>
               </Link>
               <Link href="/profile/loved" className="flex flex-col items-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -88,14 +111,27 @@ const Profile: NextPage = () => {
                   return (
                     <div className="mt-12" key={item?.id}>
                       <div className="flex items-center space-x-4">
-                        <div className="h-12 w-12 rounded-full bg-slate-500" />
+                        {item?.createdBy?.avatar ? (
+                          <img
+                            src={cloudflareGetImage(item?.createdBy?.avatar, "avatar")}
+                            className="h-12 w-12 rounded-full bg-slate-500"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 rounded-full bg-slate-500"></div>
+                        )}
+
                         <div>
-                          <h4 className="text-sm font-bold text-gray-800">{item?.createdBy?.name}</h4>
+                          <h4 className="text-sm font-bold text-gray-800">
+                            {item?.createdBy?.name}
+                          </h4>
                           <div className="flex items-center">
                             {/* 별점 */}
                             {[1, 2, 3, 4, 5].map((star) => (
                               <svg
-                                className={cls("h-5 w-5", item?.scroe >= star ? "text-yellow-400" : "text-gray-400")}
+                                className={cls(
+                                  "h-5 w-5",
+                                  item?.scroe >= star ? "text-yellow-400" : "text-gray-400"
+                                )}
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 20 20"
                                 fill="currentColor"

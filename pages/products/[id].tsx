@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Product, User } from "@prisma/client";
 import useMutation from "@/libs/client/useMutation";
-import { cls } from "@/libs/client/utils";
+import { cloudflareGetImage, cls } from "@/libs/client/utils";
 import useUser from "@/libs/client/useUser";
 import Spinner from "@/components/spinner";
 
@@ -59,9 +59,23 @@ const ItemDetail: NextPage = () => {
         <Layout canGoBack hasTabBar>
           <div className="px-4  py-4">
             <div className="mb-8">
-              <div className="h-96 bg-slate-300" />
+              {data?.product?.image ? (
+                <img
+                  src={cloudflareGetImage(data?.product?.image, "product")}
+                  className="mx-auto h-96 bg-slate-300"
+                />
+              ) : (
+                <div className="h-96 bg-slate-300"></div>
+              )}
               <div className="flex cursor-pointer items-center space-x-3 border-b border-t py-3">
-                <div className="h-12 w-12 rounded-full bg-slate-300" />
+                {data?.product?.user?.avatar ? (
+                  <img
+                    src={cloudflareGetImage(data?.product?.user?.avatar, "avatar")}
+                    className="h-12 w-12 rounded-full bg-slate-300"
+                  />
+                ) : (
+                  <div className="h-12 w-12 rounded-full bg-slate-300"></div>
+                )}
                 <div>
                   <p className="text-sm font-medium text-gray-700">{data?.product?.user?.name}</p>
                   <Link
@@ -113,7 +127,14 @@ const ItemDetail: NextPage = () => {
                   ? data?.similarItems?.map((item) => (
                       <Link href={`/products/${item.id}`} key={item?.id}>
                         <div>
-                          <div className="mb-4 h-56 w-full bg-slate-300" />
+                          {item.image ? (
+                            <img
+                              src={cloudflareGetImage(item.image, "product")}
+                              className="mb-4 h-56 w-full bg-slate-300"
+                            />
+                          ) : (
+                            <div className="mb-4 h-56 w-full bg-slate-300"></div>
+                          )}
                           <h3 className="-mb-1 text-gray-700">
                             <b>{item.name}</b>
                           </h3>
