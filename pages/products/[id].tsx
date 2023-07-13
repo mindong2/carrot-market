@@ -9,6 +9,7 @@ import useMutation from "@/libs/client/useMutation";
 import { cloudflareGetImage, cls } from "@/libs/client/utils";
 import useUser from "@/libs/client/useUser";
 import Spinner from "@/components/spinner";
+import Image from "next/image";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -60,18 +61,32 @@ const ItemDetail: NextPage = () => {
           <div className="px-4  py-4">
             <div className="mb-8">
               {data?.product?.image ? (
-                <img
-                  src={cloudflareGetImage(data?.product?.image, "product")}
-                  className="mx-auto h-96 bg-slate-300"
-                />
+                /* 외부 이미지 Image적용시 구체적인 width, height를 알기 힘들때 Image는 fill속성을 주면 absolute가 되므로 배경이미지처럼 처리*/
+                <div className="relative h-80">
+                  <Image
+                    src={cloudflareGetImage(data?.product?.image, "product")}
+                    className="mx-auto bg-slate-300 object-fill"
+                    fill
+                    alt="제품 사진"
+                    placeholder="blur"
+                    // 외부 이미지 로드전에 blur처리 하기위해 하단 외부이미지 추가
+                    blurDataURL="https://i.ibb.co/ByhpsFY/blur.png"
+                    // 페이지내 가장 큰 이미지에 우선순위 적용
+                    priority
+                  />
+                </div>
               ) : (
                 <div className="h-96 bg-slate-300"></div>
               )}
               <div className="flex cursor-pointer items-center space-x-3 border-b border-t py-3">
                 {data?.product?.user?.avatar ? (
-                  <img
+                  // 외부 이미지 Image 컴포넌트 적용 (next.config.js에서 외부링크 작성)
+                  <Image
                     src={cloudflareGetImage(data?.product?.user?.avatar, "avatar")}
+                    width={48}
+                    height={48}
                     className="h-12 w-12 rounded-full bg-slate-300"
+                    alt="프로필사진"
                   />
                 ) : (
                   <div className="h-12 w-12 rounded-full bg-slate-300"></div>
