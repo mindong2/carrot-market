@@ -1,11 +1,21 @@
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Button from "@/components/button";
 import Input from "@/components/input";
 import { cls } from "@/libs/client/utils";
 import { useForm } from "react-hook-form";
 import useMutation from "@/libs/client/useMutation";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
+import Spinner from "@/components/spinner";
+// - 혹여 dynamic 컴포넌트가 커서 로딩이 생긴다면 옵션으로 지정가능
+const DynamicComponent: any = dynamic(
+  () =>
+    new Promise<any>((resolve) =>
+      setTimeout(() => resolve(import("@/components/DynamicComponent")), 10000)
+    ),
+  { ssr: false, suspense: true, loading: () => <span>Loading...</span> }
+);
 
 interface EnterForm {
   email: string;
@@ -25,7 +35,8 @@ const Enter: NextPage = () => {
   const [enter, { loading, data, error }] = useMutation<MutationResult>("/api/user/enter");
   const { register, handleSubmit, reset } = useForm<EnterForm>();
   // 토큰 Mutation 추가 -
-  const [token, { loading: tokenLoading, data: tokenData }] = useMutation<MutationResult>("/api/user/confirm");
+  const [token, { loading: tokenLoading, data: tokenData }] =
+    useMutation<MutationResult>("/api/user/confirm");
   const { register: tokenRegister, handleSubmit: tokenHandleSubmit } = useForm<TokenForm>();
   const [method, setMethod] = useState<"email" | "phone">("email");
   // tab해도 다른 tab의 value가 남아있으므로 reset으로 초기화
@@ -59,7 +70,13 @@ const Enter: NextPage = () => {
       <div className="mt-12">
         {data?.success ? (
           <form onSubmit={tokenHandleSubmit(onTokenValid)} className="mt-8 flex flex-col space-y-4">
-            <Input name="email" register={tokenRegister("token")} label="인증번호" type="text" required />
+            <Input
+              name="email"
+              register={tokenRegister("token")}
+              label="인증번호"
+              type="text"
+              required
+            />
             <Button text={tokenLoading ? "인증번호 확인중..." : "인증번호 확인"} />
           </form>
         ) : (
@@ -70,7 +87,9 @@ const Enter: NextPage = () => {
                 <button
                   className={cls(
                     "border-b-2 pb-4 text-sm font-medium",
-                    method === "email" ? " border-orange-500 text-orange-400" : "border-transparent text-gray-500 hover:text-gray-400"
+                    method === "email"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent text-gray-500 hover:text-gray-400"
                   )}
                   onClick={onEmailClick}
                 >
@@ -79,7 +98,9 @@ const Enter: NextPage = () => {
                 <button
                   className={cls(
                     "border-b-2 pb-4 text-sm font-medium",
-                    method === "phone" ? " border-orange-500 text-orange-400" : "border-transparent text-gray-500 hover:text-gray-400"
+                    method === "phone"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent text-gray-500 hover:text-gray-400"
                   )}
                   onClick={onPhoneClick}
                 >
@@ -87,11 +108,37 @@ const Enter: NextPage = () => {
                 </button>
               </div>
             </div>
-            <form onSubmit={handleSubmit(onValid)} className="mt-8 flex flex-col space-y-4">
-              {method === "email" ? <Input name="email" register={register("email")} label="이메일 주소" type="email" required /> : null}
-              {method === "phone" ? <Input name="phone" register={register("phone")} label="휴대폰 번호" type="text" kind="phone" required /> : null}
-              {method === "email" ? <Button text={loading ? "인증번호 발급중..." : "로그인 링크로 이동"} /> : null}
-              {method === "phone" ? <Button text={loading ? "인증번호 발급중..." : "인증번호 발급"} /> : null}
+            <form onSubmit={handleSubmit(onValid)} className="mt-4 flex flex-col space-y-4">
+              {method === "email" ? (
+                <>
+                  <Input
+                    name="email"
+                    register={register("email")}
+                    label="이메일 주소"
+                    type="email"
+                    required
+                  />
+                </>
+              ) : null}
+              {method === "phone" ? (
+                <>
+                  <DynamicComponent />
+                  <Input
+                    name="phone"
+                    register={register("phone")}
+                    label="휴대폰 번호"
+                    type="text"
+                    kind="phone"
+                    required
+                  />
+                </>
+              ) : null}
+              {method === "email" ? (
+                <Button text={loading ? "인증번호 발급중..." : "로그인 링크로 이동"} />
+              ) : null}
+              {method === "phone" ? (
+                <Button text={loading ? "인증번호 발급중..." : "인증번호 발급"} />
+              ) : null}
             </form>
           </>
         )}
