@@ -1,11 +1,14 @@
-import type { NextPage } from "next";
+import type { NextPage, NextPageContext } from "next";
 import Link from "next/link";
 import Layout from "../../components/layout";
-import useSWR from "swr";
+import useSWR, { SWRConfig } from "swr";
 import { Review, User } from "@prisma/client";
 import { cloudflareGetImage, cls } from "@/libs/client/utils";
 import useUser from "@/libs/client/useUser";
 import Spinner from "@/components/spinner";
+import Image from "next/image";
+import { withSsrSession } from "@/libs/server/withSession";
+import client from "@/libs/server/client";
 
 interface Iprofile {
   success: boolean;
@@ -24,7 +27,6 @@ interface reviewWithCreateFor {
 const Profile: NextPage = () => {
   const { data: reviewData } = useSWR<reviewWithCreateFor>("/api/review");
   const { user } = useUser();
-  console.log(user);
   return (
     <>
       {reviewData ? (
@@ -34,6 +36,8 @@ const Profile: NextPage = () => {
               {user?.avatar ? (
                 <img
                   // 맨끝이 public이 아닌 avatar -> CF 페이지에서 variance 추가
+                  alt=""
+                  placeholder="blur"
                   src={cloudflareGetImage(user?.avatar, "avatar")}
                   className="h-16 w-16 rounded-full bg-slate-500"
                 />
@@ -50,13 +54,7 @@ const Profile: NextPage = () => {
             <div className="mt-10 flex justify-around">
               <Link href="/profile/sold" className="flex flex-col items-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -69,32 +67,15 @@ const Profile: NextPage = () => {
               </Link>
               <Link href="/profile/bought" className="flex flex-col items-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                    ></path>
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                   </svg>
                 </div>
                 <span className="mt-2 text-sm font-medium text-gray-700">구매내역</span>
               </Link>
               <Link href="/profile/loved" className="flex flex-col items-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -112,26 +93,18 @@ const Profile: NextPage = () => {
                     <div className="mt-12" key={item?.id}>
                       <div className="flex items-center space-x-4">
                         {item?.createdBy?.avatar ? (
-                          <img
-                            src={cloudflareGetImage(item?.createdBy?.avatar, "avatar")}
-                            className="h-12 w-12 rounded-full bg-slate-500"
-                          />
+                          <img src={cloudflareGetImage(item?.createdBy?.avatar, "avatar")} alt="" className="h-12 w-12 rounded-full bg-slate-500" />
                         ) : (
                           <div className="h-12 w-12 rounded-full bg-slate-500"></div>
                         )}
 
                         <div>
-                          <h4 className="text-sm font-bold text-gray-800">
-                            {item?.createdBy?.name}
-                          </h4>
+                          <h4 className="text-sm font-bold text-gray-800">{item?.createdBy?.name}</h4>
                           <div className="flex items-center">
                             {/* 별점 */}
                             {[1, 2, 3, 4, 5].map((star) => (
                               <svg
-                                className={cls(
-                                  "h-5 w-5",
-                                  item?.scroe >= star ? "text-yellow-400" : "text-gray-400"
-                                )}
+                                className={cls("h-5 w-5", item?.scroe >= star ? "text-yellow-400" : "text-gray-400")}
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 20 20"
                                 fill="currentColor"
@@ -160,4 +133,31 @@ const Profile: NextPage = () => {
   );
 };
 
-export default Profile;
+const Page: NextPage<{ profile: User }> = ({ profile }) => {
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          "/api/users/me": { ok: true, profile },
+        },
+      }}
+    >
+      <Profile />
+    </SWRConfig>
+  );
+};
+
+// 인증정보도 서버에서 받아오고 Page라는 컴포넌트로 전달 후 Profile로 전달, 초기 캐시값 지정
+
+export const getServerSideProps = withSsrSession(async function ({ req }: NextPageContext) {
+  const profile = await client.user.findUnique({
+    where: { id: req?.session.user?.id },
+  });
+  return {
+    props: {
+      profile: JSON.parse(JSON.stringify(profile)),
+    },
+  };
+});
+// export default 하는 컴포넌트에 따라 getServerSideProps에서 요청하는 데이터가 다른곳으로 전달된다.
+export default Page;
