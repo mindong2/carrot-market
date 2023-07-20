@@ -57,7 +57,7 @@ const ItemDetail: NextPage = () => {
   return (
     <>
       {data ? (
-        <Layout canGoBack hasTabBar>
+        <Layout canGoBack hasTabBar seoTitle="Product Detail">
           <div className="px-4  py-4">
             <div className="mb-8">
               {data?.product?.image ? (
