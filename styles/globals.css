@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+.blog-post-content h1 {
+  @apply mb-5 text-xl text-blue-500;
+}
+
+.blog-post-content p {
+  @apply mb-1 text-gray-600;
+}
+
+.blog-post-content ul {
+  @apply list-disc pl-10;
+}
 /* 
 	tailwind reset이 포함 
 	Just In Time (JIT) -> 실제 사용하는 클래스명만 컴파일러에 의해 바로 생성
