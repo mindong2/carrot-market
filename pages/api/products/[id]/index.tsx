@@ -48,7 +48,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       userId : user?.id,
       productId: Number(id)
     }
-  }))
+  }));
 
   res.status(200).json({ success: true, product, isFavorite, similarItems });
 }

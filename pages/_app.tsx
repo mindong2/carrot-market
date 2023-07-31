@@ -10,6 +10,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <SWRConfig value={{ refreshInterval: 300000, fetcher }}>
       <div className="mx-auto w-full max-w-xl">
+        {/* @ts-ignore */}
         <Component {...pageProps} />
       </div>
       {/* 유저와 상호작용 전 미리 로드 (사용할일이 적음) 

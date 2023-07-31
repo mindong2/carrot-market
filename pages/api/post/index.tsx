@@ -21,6 +21,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         },
       },
     });
+
+    // POST로 들어온 요청에 대한 응답 시 /community 페이지를 revalidate (ISR)
+    await res.revalidate("/community");
+
     res.json({ success: true, post });
   }
 
