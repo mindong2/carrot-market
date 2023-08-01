@@ -138,7 +138,7 @@ const Page: NextPage<{ profile: User }> = ({ profile }) => {
     <SWRConfig
       value={{
         fallback: {
-          "/api/users/me": { ok: true, profile },
+          "/api/users/me": { success: true, profile },
         },
       }}
     >

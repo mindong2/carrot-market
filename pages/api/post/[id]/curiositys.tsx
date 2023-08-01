@@ -44,7 +44,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       },
     });
   }
-
+  await res.revalidate("/community");
   res.status(200).json({ success: true });
 }
 

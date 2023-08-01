@@ -99,7 +99,22 @@ const Community: NextPage<Ipost> = ({ post }) => {
 };
 
 export async function getStaticProps() {
-  const posts = await client.post.findMany({ include: { user: true } });
+  const posts =  await client.post.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      _count: {
+        select: {
+          answers: true,
+          curiositys: true,
+        },
+      },
+    }
+  });
   return {
     props: {
       post: JSON.parse(JSON.stringify(posts)),

@@ -22,7 +22,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       },
     });
 
-    // POST로 들어온 요청에 대한 응답 시 /community 페이지를 revalidate (ISR)
+    // POST로 들어온 요청에 대한 응답 시 /community 페이지를 revalidate (ISR의 ODR 글입력 -> 페이지 전환시 정적페이지생성)
     await res.revalidate("/community");
 
     res.json({ success: true, post });

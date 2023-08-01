@@ -25,14 +25,14 @@ const Post: NextPage<{ post: string; data: Idata }> = ({ post, data }) => {
 export default Post;
 
 export const getStaticPaths: GetStaticPaths = () => {
-  const files = readdirSync("./posts").map((item) => {
-    const [fileName, _] = item.split(".");
-    return { params: { slug: fileName } };
-  });
+  // const files = readdirSync("./posts").map((item) => {
+  //   const [fileName, _] = item.split(".");
+  //   return { params: { slug: fileName } };
+  // });
 
   return {
-    paths: files,
-    fallback: false,
+    paths: [],
+    fallback: "blocking",
   };
 };
 
@@ -59,9 +59,10 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
         paths: [
             { params: {동적url변수 : 파일명} }
         ],
+        fallback: true | false | 'blocking',
         // 
         true -> 많은 static 페이지를 생성해야 하지만 빌드 시간이 너무 오래 걸릴 때 사용
-                1. 먼저 사용자에게 fallback 페이지를 보여줌
+                1. 먼저 사용자에게 fallback 페이지를 보여줌 (router.isFallback으로 html 생성중인지 판별가능 이를 이용해 spinner 등 로딩화면 제공 가능하다)
                 2. 서버에서 static하게 페이지를 생성함
                 3. 해당 페이지를 사용자에게 보여줌
                 4. 다음부터 해당 페이지로 접속하는 사용자에게는 static한 페이지를 보여줌
@@ -91,7 +92,7 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
     const file = await unified()
     .use(remarkParse)
     .use(remarkHtml)
-    .process(await read('example.md'))666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666
+    .process(await read('example.md'))
     ```
     https://www.npmjs.com/package/remark-html
   */
