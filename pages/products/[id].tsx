@@ -177,11 +177,6 @@ export const getStaticPaths: GetStaticPaths = () => {
 };
 
 export const getStaticProps: GetStaticProps = async (ctx) => {
-  if (ctx?.params?.id) {
-    return {
-      props: {},
-    };
-  }
 
   // product query
   const product = await client.product.findUnique({
@@ -198,6 +193,14 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
       },
     },
   });
+
+  if (ctx?.params?.id) {
+    return {
+      props: {
+        product: JSON.parse(JSON.stringify(product))
+      },
+    };
+  }
 
   // 해당 상품의 이름에 포함된 단어들 들어가있는 product.name을 찾아온다.
   const terms = product?.name.split(" ").map((term) => {
