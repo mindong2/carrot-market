@@ -7,7 +7,7 @@ import { Answer, Post, User } from "@prisma/client";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import useMutation from "@/libs/client/useMutation";
-import { cls } from "@/libs/client/utils";
+import { cloudflareGetImage, cls } from "@/libs/client/utils";
 import { useEffect } from "react";
 import useUser from "@/libs/client/useUser";
 import Spinner from "@/components/spinner";
@@ -87,7 +87,7 @@ const CommunityPostDetail: NextPage = () => {
     );
   };
 
-  // console.log(writerData);
+  console.log(writerData?.post);
   return (
     <Layout canGoBack>
       {writerData ? (
@@ -96,7 +96,10 @@ const CommunityPostDetail: NextPage = () => {
             동네질문
           </span>
           <div className="mb-3 flex cursor-pointer items-center space-x-3  border-b px-4 pb-3">
-            <div className="h-10 w-10 rounded-full bg-slate-300" />
+            {writerData?.post?.user?.avatar ?
+              <img src={cloudflareGetImage(writerData?.post?.user?.avatar, "avatar")} alt="" className="h-12 w-12 rounded-full bg-slate-500" /> : 
+              <div className="h-10 w-10 rounded-full bg-slate-300" /> 
+            }
             <div>
               <Link href={`/profile/${writerData?.post?.user?.id}`}>
                 <p className="text-sm font-medium text-gray-700">{writerData?.post?.user?.name}</p>
@@ -157,7 +160,10 @@ const CommunityPostDetail: NextPage = () => {
             return (
               <div className="my-5 space-y-5 px-4" key={answer.id}>
                 <div className="flex items-start space-x-3">
-                  <div className="h-8 w-8 rounded-full bg-slate-200" />
+                  {answer?.user?.avatar ? 
+                    <img src={cloudflareGetImage(answer?.user?.avatar, "avatar")} alt="" className="h-8 w-8 rounded-full bg-slate-500" /> : 
+                    <div className="h-8 w-8 rounded-full bg-slate-300" />
+                  }
                   <div>
                     <span className="block text-sm font-medium text-gray-700">
                       {answer?.user?.name}

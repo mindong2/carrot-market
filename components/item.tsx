@@ -1,3 +1,4 @@
+import useUser from "@/libs/client/useUser";
 import Link from "next/link";
 
 interface ItemProps {
@@ -10,8 +11,9 @@ interface ItemProps {
 }
 
 export default function Item({ title, price, comments, hearts, id, imgSrc }: ItemProps) {
+  const { user } = useUser();
   return (
-    <Link href={`/products/${id}`} className="flex cursor-pointer justify-between px-4 pt-5">
+    <Link href={`/products/${id}?user=${user.id}`} className="flex cursor-pointer justify-between px-4 pt-5">
       <div className="flex space-x-4">
         {imgSrc ? (
           <img src={imgSrc} className="h-20 w-20 rounded-md bg-gray-400" />

@@ -23,6 +23,8 @@ interface ItemTypes {
 }
 
 const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) => {
+  console.log(isFavorite);
+
   const { user, isLoading } = useUser();
   const router = useRouter();
   /*
@@ -43,7 +45,6 @@ const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) 
   );
 
   const [favorite] = useMutation(`/api/products/${router.query.id}/fav`);
-
   const favoriteClick = () => {
     if (!data) return;
     // 데이터 update 후 다시 되돌릴때 isFavorite 외 다른 데이터들을 갱신시킬필요가 없으므로 2번째인자 false
@@ -62,11 +63,13 @@ const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) 
           <div className="mb-8">
             {product?.image ? (
               /* 외부 이미지 Image적용시 구체적인 width, height를 알기 힘들때 Image는 fill속성을 주면 absolute가 되므로 배경이미지처럼 처리*/
-              <div className="relative h-80">
+              <div className="relative h-'auto'">
                 <Image
                   src={cloudflareGetImage(product?.image, "product")}
-                  className="mx-auto bg-slate-300 object-fill"
-                  fill
+                  className="mx-auto w-[90%] bg-slate-300 object-fill"
+                  width={0}
+                  height={0}
+                  sizes="100vw"
                   alt="제품 사진"
                   placeholder="blur"
                   // 외부 이미지 로드전에 blur처리 하기위해 하단 외부이미지 추가
@@ -78,7 +81,7 @@ const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) 
             ) : (
               <div className="h-96 bg-slate-300"></div>
             )}
-            <div className="flex cursor-pointer items-center space-x-3 border-b border-t py-3">
+            <div className="flex cursor-pointer items-center space-x-3 border-b border-t py-3 mt-8">
               {product?.user?.avatar ? (
                 // 외부 이미지 Image 컴포넌트 적용 (next.config.js에서 외부링크 작성)
                 <Image
@@ -177,7 +180,6 @@ export const getStaticPaths: GetStaticPaths = () => {
 };
 
 export const getStaticProps: GetStaticProps = async (ctx) => {
-
   // product query
   const product = await client.product.findUnique({
     where: {
@@ -193,14 +195,7 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
       },
     },
   });
-
-  if (ctx?.params?.id) {
-    return {
-      props: {
-        product: JSON.parse(JSON.stringify(product))
-      },
-    };
-  }
+  
 
   // 해당 상품의 이름에 포함된 단어들 들어가있는 product.name을 찾아온다.
   const terms = product?.name.split(" ").map((term) => {
@@ -221,7 +216,7 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
       },
     },
   });
-  const isFavorite = false;
+  const isFavorite = true;
   // const isFavorite = Boolean(
   //   await client.favorite.findFirst({
   //     where: {
@@ -231,13 +226,15 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
   //   })
   // );
 
-  return {
-    props: {
-      product: JSON.parse(JSON.stringify(product)),
-      similarItems: JSON.parse(JSON.stringify(similarItems)),
-      isFavorite: JSON.parse(JSON.stringify(isFavorite)),
-    },
-  };
+  if (ctx?.params?.id) {
+    return {
+      props: {
+        product: JSON.parse(JSON.stringify(product)),
+        similarItems: JSON.parse(JSON.stringify(similarItems)),
+        isFavorite: JSON.parse(JSON.stringify(isFavorite)),
+      },
+    };
+  }
 };
 
 export default ItemDetail;
