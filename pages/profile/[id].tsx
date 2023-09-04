@@ -1,10 +1,8 @@
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import Input from "../../components/input";
 import Layout from "../../components/layout";
-import { useRouter } from "next/router";
 import { cloudflareGetImage } from "@/libs/client/utils";
 import Image from "next/image";
-import useSWR from "swr";
 
 interface IProfile {
   userProfile: {
@@ -61,14 +59,7 @@ const ViewProfile: NextPage<IProfile> = ({ userProfile }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = () => {
-  return {
-    paths: [],
-    fallback: "blocking",
-  };
-};
-
-export const getStaticProps: GetStaticProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const userProfile = await client.user.findUnique({
     where: {
       id: Number(ctx?.params?.id),
@@ -86,7 +77,6 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
       props: {
         userProfile: JSON.parse(JSON.stringify(userProfile)),
       },
-      revalidate: 100000,
     };
   }
 };
