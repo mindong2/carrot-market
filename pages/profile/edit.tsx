@@ -87,8 +87,7 @@ const EditProfile: NextPage = () => {
     if (user?.name) setValue("name", user?.name);
     if (user?.email) setValue("email", user?.email);
     if (user?.phone) setValue("phone", user?.phone);
-    if (user?.avatar) setAvatarPreview(cloudflareGetImage(user?.avatar, "avatar"));
-    console.log(user);
+    if (user?.avatar) setAvatarPreview(cloudflareGetImage(user?.avatar, "list"));
   }, [user, setValue]);
 
   useEffect(() => {
@@ -101,11 +100,18 @@ const EditProfile: NextPage = () => {
   }, [data, router]);
 
   return (
-    <Layout canGoBack title="Edit Profile">
+    <Layout canGoBack title="프로필 수정">
       <form className="space-y-4 px-4 py-10" onSubmit={handleSubmit(onValid)}>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col items-center justify-center space-x-3 space-y-3">
           {avatarPreview ? (
-            <Image src={avatarPreview} alt="" className="h-14 w-14 rounded-full bg-slate-500" />
+            <Image
+              src={avatarPreview}
+              alt=""
+              width={140}
+              height={140}
+              priority
+              className="h-48 w-48 rounded-full border-2 border-gray-200 bg-slate-500"
+            />
           ) : (
             <div className="h-14 w-14 rounded-full bg-slate-500"></div>
           )}
@@ -113,22 +119,43 @@ const EditProfile: NextPage = () => {
             htmlFor="picture"
             className="cursor-pointer rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
-            Change
-            <input {...register("avatar")} id="picture" type="file" className="hidden" accept="image/*" />
+            사진변경
+            <input
+              {...register("avatar")}
+              id="picture"
+              type="file"
+              className="hidden"
+              accept="image/*"
+            />
           </label>
         </div>
         <Input register={register("name")} required label="이름" name="text" type="text" />
         {!user?.email ? (
           <>
-            <Input register={register("phone")} required={false} label="휴대폰 번호" name="phone" type="number" kind="phone" />
+            <Input
+              register={register("phone")}
+              required={false}
+              label="휴대폰 번호"
+              name="phone"
+              type="number"
+              kind="phone"
+            />
           </>
         ) : (
           <>
-            <Input register={register("email")} required={false} label="이메일" name="email" type="email" />
+            <Input
+              register={register("email")}
+              required={false}
+              label="이메일"
+              name="email"
+              type="email"
+            />
           </>
         )}
-        {errors.root ? <span className="block py-1 font-medium text-red-500">{errors.root.message}</span> : null}
-        <Button text={loading ? "Loading..." : "Update profile"} />
+        {errors.root ? (
+          <span className="block py-1 font-medium text-red-500">{errors.root.message}</span>
+        ) : null}
+        <Button text={loading ? "수정중..." : "프로필 수정하기"} />
       </form>
     </Layout>
   );

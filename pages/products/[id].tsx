@@ -23,8 +23,6 @@ interface ItemTypes {
 }
 
 const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) => {
-  console.log(isFavorite);
-
   const { user, isLoading } = useUser();
   const router = useRouter();
   /*
@@ -58,12 +56,12 @@ const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) 
   return (
     <>
       (
-      <Layout canGoBack hasTabBar seoTitle="Product Detail">
+      <Layout canGoBack hasTabBar title="제품 상세" seoTitle="Product Detail">
         <div className="px-4  py-4">
           <div className="mb-8">
             {product?.image ? (
               /* 외부 이미지 Image적용시 구체적인 width, height를 알기 힘들때 Image는 fill속성을 주면 absolute가 되므로 배경이미지처럼 처리*/
-              <div className="relative h-'auto'">
+              <div className="h-'auto' relative">
                 <Image
                   src={cloudflareGetImage(product?.image, "product")}
                   className="mx-auto w-[90%] bg-slate-300 object-fill"
@@ -81,7 +79,7 @@ const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) 
             ) : (
               <div className="h-96 bg-slate-300"></div>
             )}
-            <div className="flex cursor-pointer items-center space-x-3 border-b border-t py-3 mt-8">
+            <div className="mt-8 flex cursor-pointer items-center space-x-3 border-b border-t py-3">
               {product?.user?.avatar ? (
                 // 외부 이미지 Image 컴포넌트 적용 (next.config.js에서 외부링크 작성)
                 <Image
@@ -97,7 +95,7 @@ const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) 
               <div>
                 <p className="text-sm font-medium text-gray-700">{product?.user?.name}</p>
                 <Link
-                  href={`/user/profile/${product?.user?.id}`}
+                  href={`/profile/${product?.user?.id}`}
                   className="text-xs font-medium text-gray-500"
                 >
                   View profile &rarr;
@@ -112,7 +110,7 @@ const ItemDetail: NextPage<ItemTypes> = ({ product, similarItems, isFavorite }) 
               </span>
               <p className=" my-6 text-gray-700">{product?.description}</p>
               <div className="flex items-center justify-between space-x-2">
-                <Button large text="Talk to seller" />
+                <Button large text="판매자에게 대화걸기" />
                 <button
                   onClick={favoriteClick}
                   className={cls(
@@ -195,7 +193,6 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
       },
     },
   });
-  
 
   // 해당 상품의 이름에 포함된 단어들 들어가있는 product.name을 찾아온다.
   const terms = product?.name.split(" ").map((term) => {

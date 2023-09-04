@@ -87,19 +87,23 @@ const CommunityPostDetail: NextPage = () => {
     );
   };
 
-  console.log(writerData?.post);
   return (
-    <Layout canGoBack>
+    <Layout canGoBack title="동네질문">
       {writerData ? (
         <div>
           <span className="my-3 ml-4 inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
             동네질문
           </span>
           <div className="mb-3 flex cursor-pointer items-center space-x-3  border-b px-4 pb-3">
-            {writerData?.post?.user?.avatar ?
-              <img src={cloudflareGetImage(writerData?.post?.user?.avatar, "avatar")} alt="" className="h-12 w-12 rounded-full bg-slate-500" /> : 
-              <div className="h-10 w-10 rounded-full bg-slate-300" /> 
-            }
+            {writerData?.post?.user?.avatar ? (
+              <img
+                src={cloudflareGetImage(writerData?.post?.user?.avatar, "avatar")}
+                alt=""
+                className="h-12 w-12 rounded-full bg-slate-500"
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-slate-300" />
+            )}
             <div>
               <Link href={`/profile/${writerData?.post?.user?.id}`}>
                 <p className="text-sm font-medium text-gray-700">{writerData?.post?.user?.name}</p>
@@ -160,10 +164,15 @@ const CommunityPostDetail: NextPage = () => {
             return (
               <div className="my-5 space-y-5 px-4" key={answer.id}>
                 <div className="flex items-start space-x-3">
-                  {answer?.user?.avatar ? 
-                    <img src={cloudflareGetImage(answer?.user?.avatar, "avatar")} alt="" className="h-8 w-8 rounded-full bg-slate-500" /> : 
+                  {answer?.user?.avatar ? (
+                    <img
+                      src={cloudflareGetImage(answer?.user?.avatar, "avatar")}
+                      alt=""
+                      className="h-8 w-8 rounded-full bg-slate-500"
+                    />
+                  ) : (
                     <div className="h-8 w-8 rounded-full bg-slate-300" />
-                  }
+                  )}
                   <div>
                     <span className="block text-sm font-medium text-gray-700">
                       {answer?.user?.name}

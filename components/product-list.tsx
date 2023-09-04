@@ -2,6 +2,7 @@ import Item from "@/components/item";
 import useSWR from "swr";
 
 import { ProductWithFavCounte } from "@/pages/index";
+import { cloudflareGetImage } from "@/libs/client/utils";
 
 interface IKind {
   kind: "sales" | "purchases" | "favs";
@@ -24,11 +25,12 @@ const ProductList = ({ kind }: IKind) => {
       {data
         ? data[kind]?.map((record) => (
             <Item
-              id={record?.id}
+              id={record?.product?.id}
               key={record?.id}
               title={record?.product?.name}
               price={record?.product?.price}
               hearts={record?.product?._count?.favorites}
+              imgSrc={cloudflareGetImage(record?.product?.image, "list")}
             />
           ))
         : null}
